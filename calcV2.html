@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор с авторизацией</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f4f8;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 90%;
+        }
+        .title {
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #333;
+        }
+        .login-form, .calculator {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+        }
+        .login-form.active, .calculator.active {
+            display: flex;
+        }
+        .login-form input, .calculator input {
+            width: 100%;
+            height: 50px;
+            margin-bottom: 10px;
+            padding: 10px;
+            font-size: 18px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .login-form button, .calculator button {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border: none;
+            background-color: #007BFF;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .login-form button:hover, .calculator button:hover {
+            background-color: #0056b3;
+        }
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            width: 100%;
+        }
+        .button {
+            padding: 20px;
+            font-size: 18px;
+            border: none;
+            background-color: #f1f3f4;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .button:hover {
+            background-color: #e0e0e0;
+        }
+        .button.operator {
+            background-color: #FF9500;
+            color: #fff;
+        }
+        .button.operator:hover {
+            background-color: #e08900;
+        }
+
+        @media (max-width: 500px) {
+            .button {
+                padding: 15px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">Калькулятор</div>
+        <div class="login-form active" id="login-form">
+            <input type="tel" id="phone-number" placeholder="Введите номер телефона">
+            <button onclick="login()">Войти</button>
+        </div>
+        <div class="calculator" id="calculator">
+            <input type="text" class="display" id="display" disabled>
+            <div class="buttons">
+                <button class="button" onclick="appendNumber(7)">7</button>
+                <button class="button" onclick="appendNumber(8)">8</button>
+                <button class="button" onclick="appendNumber(9)">9</button>
+                <button class="button operator" onclick="setOperator('/')">/</button>
+
+                <button class="button" onclick="appendNumber(4)">4</button>
+                <button class="button" onclick="appendNumber(5)">5</button>
+                <button class="button" onclick="appendNumber(6)">6</button>
+                <button class="button operator" onclick="setOperator('*')">*</button>
+
+                <button class="button" onclick="appendNumber(1)">1</button>
+                <button class="button" onclick="appendNumber(2)">2</button>
+                <button class="button" onclick="appendNumber(3)">3</button>
+                <button class="button operator" onclick="setOperator('-')">-</button>
+
+                <button class="button" onclick="appendNumber(0)">0</button>
+                <button class="button" onclick="clearDisplay()">C</button>
+                <button class="button" onclick="calculate()">=</button>
+                <button class="button operator" onclick="setOperator('+')">+</button>
+
+                <button class="button" onclick="sqrt()">√</button>
+                <button class="button" onclick="percent()">%</button>
+                <button class="button" onclick="power()">x²</button>
+                <button class="button" onclick="toggleSign()">±</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let display = document.getElementById('display');
+        let currentOperator = null;
+        let currentValue = '';
+        let previousValue = '';
+
+        function login() {
+            const phoneNumber = document.getElementById('phone-number').value;
+            if (phoneNumber) {
+                document.getElementById('login-form').classList.remove('active');
+                document.getElementById('calculator').classList.add('active');
+            } else {
+                alert('Пожалуйста, введите номер телефона.');
+            }
+        }
+
+        function appendNumber(number) {
+            currentValue += number;
+            display.value = currentValue;
+        }
+
+        function setOperator(operator) {
+            if (currentValue === '') return;
+            if (previousValue !== '') {
+                calculate();
+            }
+            currentOperator = operator;
+            previousValue = currentValue;
+            currentValue = '';
+        }
+
+        function calculate() {
+            if (currentValue === '' || currentOperator === null) return;
+            let result;
+            const prev = parseFloat(previousValue);
+            const current = parseFloat(currentValue);
+
+            switch (currentOperator) {
+                case '+':
+                    result = prev + current;
+                    break;
+                case '-':
+                    result = prev - current;
+                    break;
+                case '*':
+                    result = prev * current;
+                    break;
+                case '/':
+                    result = prev / current;
+                    break;
+                default:
+                    return;
+            }
+            currentValue = result.toString();
+            display.value = currentValue;
+            currentOperator = null;
+            previousValue = '';
+        }
+
+        function clearDisplay() {
+            currentValue = '';
+            previousValue = '';
+            currentOperator = null;
+            display.value = '';
+        }
+
+        function sqrt() {
+            if (currentValue === '') return;
+            currentValue = Math.sqrt(parseFloat(currentValue)).toString();
+            display.value = currentValue;
+        }
+
+        function percent() {
+            if (currentValue === '') return;
+            currentValue = (parseFloat(currentValue) / 100).toString();
+            display.value = currentValue;
+        }
+
+        function power() {
+            if (currentValue === '') return;
+            currentValue = Math.pow(parseFloat(currentValue), 2).toString();
+            display.value = currentValue;
+        }
+
+        function toggleSign() {
+            if (currentValue === '') return;
+            currentValue = (parseFloat(currentValue) * -1).toString();
+            display.value = currentValue;
+        }
+    </script>
+</body>
+</html>
